@@ -15,6 +15,7 @@
 
 import os
 import time
+from errno import ENOENT
 
 
 class SimpleTailer():
@@ -22,9 +23,13 @@ class SimpleTailer():
         """
         Initialise and seek to the end of the file
         """
-        self.filepath = filepath
-        self.open_handle()
-        self.handle.seek(0, os.SEEK_END)
+        self.handle = None
+        if os.path.isfile(filepath):
+            self.filepath = filepath
+            self.open_handle()
+            self.handle.seek(0, os.SEEK_END)
+        else:
+            raise IOError(ENOENT, 'File not found', filepath)
 
     def open_handle(self):
         """
@@ -72,4 +77,5 @@ class SimpleTailer():
         pass
 
     def __del__(self):
-        self.handle.close()
+        if self.handle is not None:
+            self.handle.close()
